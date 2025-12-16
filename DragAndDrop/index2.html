@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Перетягування різних об'єктів</title>
+<style>
+  body {
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    background: #f0f0f0;
+  }
+
+  .draggable {
+    position: absolute;
+    cursor: grab;
+    user-select: none;
+    z-index: 1;
+  }
+
+  /* Квадрат */
+  #box1 {
+    width: 100px;
+    height: 100px;
+    background-color: rgba(231, 76, 60, 0.7); /* червоний напівпрозорий */
+  }
+
+  /* Коло */
+  #box2 {
+    width: 100px;
+    height: 100px;
+    background-color: rgba(46, 204, 113, 0.7); /* зелений напівпрозорий */
+    border-radius: 50%;
+  }
+
+  /* Трикутник */
+  #box3 {
+    width: 0;
+    height: 0;
+    border-left: 50px solid transparent;
+    border-right: 50px solid transparent;
+    border-bottom: 100px solid rgba(241, 196, 15, 0.7); /* жовтий напівпрозорий */
+  }
+</style>
+</head>
+<body>
+
+<div id="box1" class="draggable" style="top:50px; left:50px;"></div>
+<div id="box2" class="draggable" style="top:50px; left:200px;"></div>
+<div id="box3" class="draggable" style="top:50px; left:350px;"></div>
+
+<script>
+const draggables = document.querySelectorAll('.draggable');
+
+draggables.forEach(elem => {
+  elem.addEventListener('mousedown', mouseDown);
+
+  function mouseDown(e) {
+    let shiftX = e.clientX - elem.getBoundingClientRect().left;
+    let shiftY = e.clientY - elem.getBoundingClientRect().top;
+
+    elem.style.zIndex = 1000;
+    moveAt(e.pageX, e.pageY);
+
+    function moveAt(pageX, pageY) {
+      elem.style.left = pageX - shiftX + 'px';
+      elem.style.top = pageY - shiftY + 'px';
+    }
+
+    function onMouseMove(event) {
+      moveAt(event.pageX, event.pageY);
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+
+    elem.addEventListener('mouseup', function() {
+      document.removeEventListener('mousemove', onMouseMove);
+      elem.onmouseup = null;
+    });
+  }
+
+  elem.ondragstart = function() {
+    return false;
+  };
+});
+</script>
+
+</body>
+</html>
