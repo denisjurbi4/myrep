@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Перетягування в межах екрану</title>
+
+<style>
+  body {
+    margin: 0;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  /* Екран (межі руху) */
+  .screen {
+    position: relative;
+    width: 600px;
+    height: 300px;
+    border: 3px solid #333;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .draggable {
+    position: absolute;
+    cursor: grab;
+    user-select: none;
+  }
+
+  /* Квадрат */
+  #box1 {
+    width: 80px;
+    height: 80px;
+    background: rgba(231, 76, 60, 0.7);
+    top: 30px;
+    left: 30px;
+  }
+
+  /* Коло */
+  #box2 {
+    width: 80px;
+    height: 80px;
+    background: rgba(46, 204, 113, 0.7);
+    border-radius: 50%;
+    top: 30px;
+    left: 150px;
+  }
+
+  /* Трикутник */
+  #box3 {
+    width: 0;
+    height: 0;
+    border-left: 40px solid transparent;
+    border-right: 40px solid transparent;
+    border-bottom: 80px solid rgba(241, 196, 15, 0.7);
+    top: 30px;
+    left: 270px;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="screen" id="screen">
+  <div id="box1" class="draggable"></div>
+  <div id="box2" class="draggable"></div>
+  <div id="box3" class="draggable"></div>
+</div>
+
+<script>
+const screen = document.getElementById('screen');
+const draggables = document.querySelectorAll('.draggable');
+
+draggables.forEach(elem => {
+  elem.addEventListener('mousedown', e => {
+
+    const rect = elem.getBoundingClientRect();
+    const screenRect = screen.getBoundingClientRect();
+
+    const shiftX = e.clientX - rect.left;
+    const shiftY = e.clientY - rect.top;
+
+    function moveAt(x, y) {
+      let left = x - shiftX - screenRect.left;
+      let top  = y - shiftY - screenRect.top;
+
+      /* Обмеження руху */
+      left = Math.max(0, Math.min(left, screen.clientWidth - rect.width));
+      top  = Math.max(0, Math.min(top,  screen.clientHeight - rect.height));
+
+      elem.style.left = left + 'px';
+      elem.style.top  = top + 'px';
+    }
+
+    function onMouseMove(event) {
+      moveAt(event.clientX, event.clientY);
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', () => {
+      document.removeEventListener('mousemove', onMouseMove);
+    }, { once: true });
+  });
+
+  elem.ondragstart = () => false;
+});
+</script>
+
+</body>
+</html>
