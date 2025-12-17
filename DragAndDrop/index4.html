@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Фізика об'єктів</title>
+
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Екран */
+  .screen {
+    position: relative;
+    width: 600px;
+    height: 350px;
+    border: 3px solid #333;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .obj {
+    position: absolute;
+    cursor: grab;
+    user-select: none;
+  }
+
+  /* Квадрат */
+  #box1 {
+    width: 70px;
+    height: 70px;
+    background: rgba(231, 76, 60, 0.7);
+  }
+
+  /* Коло */
+  #box2 {
+    width: 70px;
+    height: 70px;
+    background: rgba(46, 204, 113, 0.7);
+    border-radius: 50%;
+  }
+
+  /* Трикутник */
+  #box3 {
+    width: 0;
+    height: 0;
+    border-left: 35px solid transparent;
+    border-right: 35px solid transparent;
+    border-bottom: 70px solid rgba(241, 196, 15, 0.7);
+  }
+</style>
+</head>
+
+<body>
+
+<div class="screen" id="screen">
+  <div id="box1" class="obj"></div>
+  <div id="box2" class="obj"></div>
+  <div id="box3" class="obj"></div>
+</div>
+
+<script>
+const screen = document.getElementById('screen');
+
+/* Параметри фізики */
+const gravity = 0.4;      // сила тяжіння
+const bounce = 0.8;       // коефіцієнт відскоку
+const friction = 0.99;    // тертя
+
+/* Об'єкти */
+const objects = [
+  { el: box1, x: 50,  y: 50,  vx: 2, vy: 0, drag: false },
+  { el: box2, x: 200, y: 50,  vx: -2, vy: 0, drag: false },
+  { el: box3, x: 350, y: 50,  vx: 1, vy: 0, drag: false }
+];
+
+/* Перетягування */
+objects.forEach(obj => {
+  obj.el.addEventListener('mousedown', e => {
+    obj.drag = true;
+    obj.vx = obj.vy = 0;
+
+    const rect = obj.el.getBoundingClientRect();
+    const shiftX = e.clientX - rect.left;
+    const shiftY = e.clientY - rect.top;
+
+    function move(e) {
+      obj.x = e.clientX - screen.offsetLeft - shiftX;
+      obj.y = e.clientY - screen.offsetTop - shiftY;
+    }
+
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', () => {
+      obj.drag = false;
+      document.removeEventListener('mousemove', move);
+    }, { once: true });
+  });
+
+  obj.el.ondragstart = () => false;
+});
+
+/* Основний цикл фізики */
+function update() {
+  objects.forEach(obj => {
+
+    if (!obj.drag) {
+      obj.vy += gravity;
+      obj.x += obj.vx;
+      obj.y += obj.vy;
+    }
+
+    const w = obj.el.offsetWidth;
+    const h = obj.el.offsetHeight;
+
+    /* Межі екрану */
+    if (obj.x <= 0 || obj.x + w >= screen.clientWidth) {
+      obj.vx *= -bounce;
+      obj.x = Math.max(0, Math.min(obj.x, screen.clientWidth - w));
+    }
+
+    if (obj.y + h >= screen.clientHeight) {
+      obj.vy *= -bounce;
+      obj.y = screen.clientHeight - h;
+      obj.vx *= friction;
+    }
+
+    if (obj.y <= 0) {
+      obj.vy *= -bounce;
+      obj.y = 0;
+    }
+
+    obj.el.style.left = obj.x + 'px';
+    obj.el.style.top  = obj.y + 'px';
+  });
+
+  requestAnimationFrame(update);
+}
+
+update();
+</script>
+
+</body>
+</html>
